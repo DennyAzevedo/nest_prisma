@@ -1,0 +1,18 @@
+# Dockerfile.dev
+
+FROM node:24
+
+WORKDIR /app
+
+# Copia apenas arquivos de dependências primeiro (para aproveitar cache)
+COPY package*.json ./
+
+RUN npm install
+
+# Opcional: copia código (em dev vamos sobrescrever via volume)
+COPY . .
+
+# Porta padrão da app (ajuste se usar outra)
+EXPOSE 4000
+
+CMD ["npm", "run", "start:dev"]
