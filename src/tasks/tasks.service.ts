@@ -3,13 +3,17 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class TasksService {
 
-	listAllTasks() {
+	findAll() {
 		return [
 			{id:1, task: "Comprar pão"}
 		]
 	}
 
-	findOneTask() {
-		return "Tarefa testes...."
+	findOne(id: string) {
+		return "Buscar tarefa com id: " + id
+	}
+
+	create(body: any) {
+		return body
 	}
 }
