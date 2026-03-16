@@ -4,7 +4,9 @@ import {
 	Post,
 	Param,
 	Query,
-	Body
+	Body,
+	Patch,
+	Delete
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 
@@ -40,5 +42,20 @@ export class TasksController {
 	createTask(@Body() body: any) {
 		//console.log(body)
 		return this.taskService.create(body)
+	}
+
+	@Patch(":id") // pode ser utilizado Put
+	updateTask(@Param("id") id: string, @Body() body: any) {
+		console.log("ID: ", id)
+		console.log("body: ", body)
+
+		return "Atualizando tarefa..."
+	}
+
+	@Delete(":id")
+	deleteTask(@Param("id") id: string) {
+		console.log("ID: ", id)
+
+		return "Deletar a tarefa com id: " + id
 	}
 }
