@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common';
 import { Task } from './entities/task.entitie';
 
 @Injectable()
@@ -72,7 +77,13 @@ export class TasksService {
 	}
 
 	findOne(id: string) {
-		return this.tasks.find(task => task.id === Number(id));
+		const task = this.tasks.find(task => task.id === Number(id));
+		if (task) {
+			return task;
+		}
+		throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
+		// depois de testar no Postman, mostrar a forma abaixo
+		// throw new NotFoundException("Tarefa não encontrada") // outra forma de lançar a exceção --- IGNORE ---
 	}
 
 	create(body: any) {
@@ -84,5 +95,25 @@ export class TasksService {
 		};
 		this.tasks.push(newTask);
 		return newTask;
+	}
+
+	update(id: string, body: any) {
+		const taskIndex = this.tasks.findIndex(task => task.id === Number(id));
+		//colocar esta condição após testar no Postman
+		if (taskIndex === -1) {
+			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
+		}
+		// só retirar após o teste no Postman
+		//if (taskIndex >= 0) {
+			const taskItem = this.tasks[taskIndex];
+			this.tasks[taskIndex] = {
+				...taskItem,
+				...body
+			};
+		//}
+
+		//return "Tarefa atualizada com sucesso!"
+		// depois de testar no Postman, mostrar a forma abaixo
+		return this.tasks[taskIndex]
 	}
 }
