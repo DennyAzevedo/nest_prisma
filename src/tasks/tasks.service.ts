@@ -116,4 +116,13 @@ export class TasksService {
 		// depois de testar no Postman, mostrar a forma abaixo
 		return this.tasks[taskIndex]
 	}
+
+	delete(id: string) {
+		const taskIndex = this.tasks.findIndex(task => task.id === Number(id));
+		if (taskIndex === -1) {
+			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
+		}
+		this.tasks.splice(taskIndex, 1);
+		return "Tarefa removida com sucesso!";
+	}
 }
