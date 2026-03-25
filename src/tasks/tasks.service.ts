@@ -1,3 +1,4 @@
+import { CreateTaskDto } from './dto/create.task.dto';
 import {
 	HttpException,
 	HttpStatus,
@@ -5,6 +6,7 @@ import {
 	NotFoundException
 } from '@nestjs/common';
 import { Task } from './entities/task.entitie';
+import { UpdateTaskDto } from './dto/update.task.dto';
 
 @Injectable()
 export class TasksService {
@@ -86,18 +88,18 @@ export class TasksService {
 		// throw new NotFoundException("Tarefa não encontrada") // outra forma de lançar a exceção --- IGNORE ---
 	}
 
-	create(body: any) {
+	create(createTaskDto: CreateTaskDto) {
 		const newId = this.tasks.length + 1;
 		const newTask: Task = {
 			id: newId,
 			completed: false,
-			...body
+			...createTaskDto
 		};
 		this.tasks.push(newTask);
 		return newTask;
 	}
 
-	update(id: string, body: any) {
+	update(id: string, updateTaskDto: UpdateTaskDto) {
 		const taskIndex = this.tasks.findIndex(task => task.id === Number(id));
 		//colocar esta condição após testar no Postman
 		if (taskIndex === -1) {
@@ -108,7 +110,7 @@ export class TasksService {
 			const taskItem = this.tasks[taskIndex];
 			this.tasks[taskIndex] = {
 				...taskItem,
-				...body
+				...updateTaskDto
 			};
 		//}
 
