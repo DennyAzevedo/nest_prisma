@@ -11,7 +11,7 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class TasksService {
-	constructor(private readonly databaseService: DatabaseService) {}
+	constructor(private readonly databaseService: DatabaseService) { }
 
 	private tasks: Task[] = [
 		{
@@ -95,50 +95,62 @@ export class TasksService {
 	}
 
 	async create(createTaskDto: CreateTaskDto) {
-		const newTask = await this.databaseService.task.create({
-			data: {
-				name: createTaskDto.name,
-				description: createTaskDto.description
-			}
-		});
+		try {
+			const newTask = await this.databaseService.task.create({
+				data: {
+					name: createTaskDto.name,
+					description: createTaskDto.description
+				}
+			});
 
-		return newTask;
+			return newTask;
+		} catch (error) {
+			throw new HttpException("Erro ao criar tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	async update(id: number, updateTaskDto: UpdateTaskDto) {
-		const findTask = await this.databaseService.task.findUnique({
-			where: {
-				id
+		try {
+			const findTask = await this.databaseService.task.findUnique({
+				where: {
+					id
+				}
+			});
+			if (!findTask) {
+				throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 			}
-		});
-		if (!findTask) {
-			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
-		}
-		const updatedTask = await this.databaseService.task.update({
-			where: {
-				id
-			},
-			data: updateTaskDto
-		});
+			const updatedTask = await this.databaseService.task.update({
+				where: {
+					id
+				},
+				data: updateTaskDto
+			});
 
-		return updatedTask;
+			return updatedTask;
+		} catch (error) {
+			throw new HttpException("Erro ao atualizar tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	async delete(id: number) {
-		const findTask = await this.databaseService.task.findUnique({
-			where: {
-				id
+		try {
+			const findTask = await this.databaseService.task.findUnique({
+				where: {
+					id
+				}
+			});
+			if (!findTask) {
+				throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 			}
-		});
-		if (!findTask) {
-			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
-		}
-		await this.databaseService.task.delete({
-			where: {
-				id
-			}
-		});
+			await this.databaseService.task.delete({
+				where: {
+					id
+				}
+			});
 
-		return {"message": "Tarefa removida com sucesso!"};
+			return { "message": "Tarefa removida com sucesso!" };
+		} catch(error) {
+			throw new HttpException("Erro ao remover tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }
