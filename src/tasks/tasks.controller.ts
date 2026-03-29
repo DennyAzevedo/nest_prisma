@@ -23,15 +23,7 @@ export class TasksController {
 	}
 
 	@Get(":id")
-	findOneTask(@Param('id') id: string) {
-	// depois de testar como string, fazer o ajuste abaixo para mostrar o transform
-	// findOneTask(@Param('id') id: number) {
-	// depois mostar a conversão manualmente, retirando o transform global
-	// findOneTask(@Param('id', ParseIntPipe) id: number) {
-	// Isso gera uma exceção no validation, não seguindo adiante
-	// depois usar o ParseIntPipe nos outros endpoints também
-		console.log(id)
-		console.log(typeof id)
+	findOneTask(@Param('id', ParseIntPipe) id: number) {
 		return this.taskService.findOne(id)
 	}
 
