@@ -13,4 +13,4 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=mysql://root:M@109G6Gustav@host.docker.internal:3306/nest_prisma
+      - DATABASE_URL=mysql://root:M@109G6Gustav@host.docker.internal:3306/nest_prismadb

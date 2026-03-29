@@ -7,9 +7,11 @@ import {
 } from '@nestjs/common';
 import { Task } from './entities/task.entitie';
 import { UpdateTaskDto } from './dto/update.task.dto';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class TasksService {
+	constructor(private readonly databaseService: DatabaseService) {}
 
 	private tasks: Task[] = [
 		{
@@ -74,54 +76,69 @@ export class TasksService {
 		}
 	];
 
-	findAll() {
-		return this.tasks;
+	async findAll() {
+		const allTasks = await this.databaseService.task.findMany();
+
+		return allTasks;
 	}
 
-	// Depois de testar no Postman, ajustar de string para number para mostrar o transform
-	findOne(id: string) {
-	//findOne(id: number) {
-		const task = this.tasks.find(task => task.id === Number(id));
-		// const task = this.tasks.find(task => task.id === id); // ajustar para esta forma após o teste no Postman
+	async findOne(id: number) {
+		const task = await this.databaseService.task.findUnique({
+			where: {
+				id
+			}
+		});
 		if (task) {
 			return task;
 		}
 		throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
-		// depois de testar no Postman, mostrar a forma abaixo
-		// throw new NotFoundException("Tarefa não encontrada") // outra forma de lançar a exceção --- IGNORE ---
 	}
 
-	create(createTaskDto: CreateTaskDto) {
-		const newId = this.tasks.length + 1;
-		const newTask: Task = {
-			id: newId,
-			completed: false,
-			...createTaskDto
-		};
-		this.tasks.push(newTask);
+	async create(createTaskDto: CreateTaskDto) {
+		const newTask = await this.databaseService.task.create({
+			data: {
+				name: createTaskDto.name,
+				description: createTaskDto.description
+			}
+		});
+
 		return newTask;
 	}
 
-	update(id: Number, updateTaskDto: UpdateTaskDto) {
-		const taskIndex = this.tasks.findIndex(task => task.id === id);
-		if (taskIndex === -1) {
+	async update(id: number, updateTaskDto: UpdateTaskDto) {
+		const findTask = await this.databaseService.task.findUnique({
+			where: {
+				id
+			}
+		});
+		if (!findTask) {
 			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 		}
-		const taskItem = this.tasks[taskIndex];
-		this.tasks[taskIndex] = {
-			...taskItem,
-			...updateTaskDto
-		};
+		const updatedTask = await this.databaseService.task.update({
+			where: {
+				id
+			},
+			data: updateTaskDto
+		});
 
-		return this.tasks[taskIndex]
+		return updatedTask;
 	}
 
-	delete(id: Number) {
-		const taskIndex = this.tasks.findIndex(task => task.id === id);
-		if (taskIndex === -1) {
+	async delete(id: number) {
+		const findTask = await this.databaseService.task.findUnique({
+			where: {
+				id
+			}
+		});
+		if (!findTask) {
 			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 		}
-		this.tasks.splice(taskIndex, 1);
-		return "Tarefa removida com sucesso!";
+		await this.databaseService.task.delete({
+			where: {
+				id
+			}
+		});
+
+		return {"message": "Tarefa removida com sucesso!"};
 	}
 }
