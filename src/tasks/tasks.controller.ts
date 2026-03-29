@@ -6,7 +6,8 @@ import {
 	Query,
 	Body,
 	Put,
-	Delete
+	Delete,
+	ParseIntPipe
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './dto/update.task.dto';
@@ -23,6 +24,14 @@ export class TasksController {
 
 	@Get(":id")
 	findOneTask(@Param('id') id: string) {
+	// depois de testar como string, fazer o ajuste abaixo para mostrar o transform
+	// findOneTask(@Param('id') id: number) {
+	// depois mostar a conversão manualmente, retirando o transform global
+	// findOneTask(@Param('id', ParseIntPipe) id: number) {
+	// Isso gera uma exceção no validation, não seguindo adiante
+	// depois usar o ParseIntPipe nos outros endpoints também
+		console.log(id)
+		console.log(typeof id)
 		return this.taskService.findOne(id)
 	}
 
@@ -32,12 +41,12 @@ export class TasksController {
 	}
 
 	@Put(":id")
-	updateTask(@Param("id") id: string, @Body() updateTaskDto: UpdateTaskDto) {
+	updateTask(@Param("id", ParseIntPipe) id: number, @Body() updateTaskDto: UpdateTaskDto) {
 		return this.taskService.update(id, updateTaskDto)
 	}
 
 	@Delete(":id")
-	deleteTask(@Param("id") id: string) {
+	deleteTask(@Param("id", ParseIntPipe) id: number) {
 		return this.taskService.delete(id)
 	}
 }

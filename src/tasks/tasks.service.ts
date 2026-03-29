@@ -78,8 +78,11 @@ export class TasksService {
 		return this.tasks;
 	}
 
+	// Depois de testar no Postman, ajustar de string para number para mostrar o transform
 	findOne(id: string) {
+	//findOne(id: number) {
 		const task = this.tasks.find(task => task.id === Number(id));
+		// const task = this.tasks.find(task => task.id === id); // ajustar para esta forma após o teste no Postman
 		if (task) {
 			return task;
 		}
@@ -99,28 +102,22 @@ export class TasksService {
 		return newTask;
 	}
 
-	update(id: string, updateTaskDto: UpdateTaskDto) {
-		const taskIndex = this.tasks.findIndex(task => task.id === Number(id));
-		//colocar esta condição após testar no Postman
+	update(id: Number, updateTaskDto: UpdateTaskDto) {
+		const taskIndex = this.tasks.findIndex(task => task.id === id);
 		if (taskIndex === -1) {
 			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 		}
-		// só retirar após o teste no Postman
-		//if (taskIndex >= 0) {
-			const taskItem = this.tasks[taskIndex];
-			this.tasks[taskIndex] = {
-				...taskItem,
-				...updateTaskDto
-			};
-		//}
+		const taskItem = this.tasks[taskIndex];
+		this.tasks[taskIndex] = {
+			...taskItem,
+			...updateTaskDto
+		};
 
-		//return "Tarefa atualizada com sucesso!"
-		// depois de testar no Postman, mostrar a forma abaixo
 		return this.tasks[taskIndex]
 	}
 
-	delete(id: string) {
-		const taskIndex = this.tasks.findIndex(task => task.id === Number(id));
+	delete(id: Number) {
+		const taskIndex = this.tasks.findIndex(task => task.id === id);
 		if (taskIndex === -1) {
 			throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 		}
