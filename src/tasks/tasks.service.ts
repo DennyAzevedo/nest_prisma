@@ -5,79 +5,27 @@ import {
 	Injectable,
 	NotFoundException
 } from '@nestjs/common';
-import { Task } from './entities/task.entitie';
 import { UpdateTaskDto } from './dto/update.task.dto';
 import { DatabaseService } from '../database/database.service';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { resolvePagination } from '../common/pagination/resolvePagination';
 
 @Injectable()
 export class TasksService {
 	constructor(private readonly databaseService: DatabaseService) { }
 
-	private tasks: Task[] = [
-		{
-			id: 1,
-			name: "Estudar introdução ao TDD",
-			description: "Estudar as videos aulas de introdução a metodologia TDD - muito importante para a carreira",
-			completed: false
-		},
-		{
-			id: 2,
-			name: "Criar primeiro endpoint REST",
-			description: "Implementar um endpoint GET simples para listar tarefas",
-			completed: false
-		},
-		{
-			id: 3,
-			name: "Implementar padrão Controller/Service",
-			description: "Separar responsabilidades entre controller e service seguindo boas práticas",
-			completed: false
-		},
-		{
-			id: 4,
-			name: "Estudar Clean Architecture",
-			description: "Compreender as camadas e dependências da arquitetura limpa",
-			completed: false
-		},
-		{
-			id: 5,
-			name: "Criar validações de entrada",
-			description: "Validar dados recebidos no body das requisições",
-			completed: false
-		},
-		{
-			id: 6,
-			name: "Implementar criação de tarefas",
-			description: "Criar endpoint POST para adicionar novas tarefas",
-			completed: false
-		},
-		{
-			id: 7,
-			name: "Atualizar status de tarefa",
-			description: "Criar endpoint PUT para marcar tarefas como concluídas",
-			completed: false
-		},
-		{
-			id: 8,
-			name: "Remover tarefa da lista",
-			description: "Criar endpoint DELETE para remover tarefas por ID",
-			completed: false
-		},
-		{
-			id: 9,
-			name: "Adicionar logs na aplicação",
-			description: "Implementar logs básicos para rastrear requisições",
-			completed: false
-		},
-		{
-			id: 10,
-			name: "Testar API com Insomnia/Postman",
-			description: "Validar todos os endpoints utilizando ferramentas de teste de API",
-			completed: false
-		}
-	];
-
-	async findAll() {
-		const allTasks = await this.databaseService.task.findMany();
+	async findAll(paginationDto: PaginationDto) {
+		//const { limit = 10, offset = 0 } = paginationDto || {};
+		const { limit, offset } = resolvePagination(paginationDto);
+		const allTasks = await this.databaseService.task.findMany({
+			//take: limit, - definir o valor padrão no DTO, para evitar a necessidade de atribuição local
+			//skip: offset - definir o valor padrão no DTO, para evitar a necessidade de atribuição local
+			take: paginationDto.limit,
+			skip: paginationDto.offset,
+			orderBy: {
+				createdAt: 'desc' // colocar depois dos testes anteriores
+			}
+		});
 
 		return allTasks;
 	}

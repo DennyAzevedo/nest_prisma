@@ -1,5 +1,3 @@
-import { url } from './../../node_modules/effect/src/Config';
-import { adapter } from './../../node_modules/effect/src/Utils';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
