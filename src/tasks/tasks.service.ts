@@ -2,8 +2,7 @@ import { CreateTaskDto } from './dto/create.task.dto';
 import {
 	HttpException,
 	HttpStatus,
-	Injectable,
-	NotFoundException
+	Injectable
 } from '@nestjs/common';
 import { UpdateTaskDto } from './dto/update.task.dto';
 import { DatabaseService } from '../database/database.service';
@@ -18,12 +17,10 @@ export class TasksService {
 		//const { limit = 10, offset = 0 } = paginationDto || {};
 		const { limit, offset } = resolvePagination(paginationDto);
 		const allTasks = await this.databaseService.task.findMany({
-			//take: limit, - definir o valor padrão no DTO, para evitar a necessidade de atribuição local
-			//skip: offset - definir o valor padrão no DTO, para evitar a necessidade de atribuição local
 			take: paginationDto.limit,
 			skip: paginationDto.offset,
 			orderBy: {
-				createdAt: 'desc' // colocar depois dos testes anteriores
+				createdAt: 'desc'
 			}
 		});
 
@@ -47,7 +44,9 @@ export class TasksService {
 			const newTask = await this.databaseService.task.create({
 				data: {
 					name: createTaskDto.name,
-					description: createTaskDto.description
+					description: createTaskDto.description,
+					completed: false,
+					userId: createTaskDto.userId
 				}
 			});
 
