@@ -14,6 +14,9 @@ export class LoggerInterceptor implements NestInterceptor {
 		const method = request.method;
 		const url = request.url;
 		const now = Date.now();
+
+		//depois do primeiro teste do middleware
+		console.log(request['users'])
 		console.log(`[REQUEST] [${method}] ${url} - ${now} - Início da requisição...`);
 
 		return next.handle().pipe(
