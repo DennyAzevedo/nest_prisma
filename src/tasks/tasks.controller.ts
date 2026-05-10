@@ -8,7 +8,8 @@ import {
 	Put,
 	Delete,
 	ParseIntPipe,
-	UseInterceptors
+	UseInterceptors,
+	UseGuards
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './dto/update.task.dto';
@@ -17,23 +18,33 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
 import { BodyCreateTaskInterceptor } from 'src/common/interceptors/body-create-task.interceptor';
 import { AddHeaderInterceptor } from 'src/common/interceptors/add-header.interceptor';
+import { AuthAdminGuard } from 'src/common/guards/admin.guards';
+import { TasksUtils } from './tasks.utils';
 
 @Controller('tasks')
+	// Testar o guard em todo conroller, depois mostar em um endponit
+	// E depois do teste, retornra o guard ao controller
+@UseGuards(AuthAdminGuard)
 	//@UseInterceptors(LoggerInterceptor)
 	// Podemos usar o interceptor para todas as rotas do controller, ou apenas para rotas específicas,
 	// como a rota de listagem de tarefas, por exemplo.
 	// Depois de testado, podemos decidir onde aplicar o interceptor.
 export class TasksController {
-	constructor(private readonly taskService: TasksService) {}
+	constructor(
+		private readonly taskService: TasksService,
+		private readonly tasksUtils: TasksUtils
+	) { }
 
 	@Get()
 	@UseInterceptors(LoggerInterceptor)
 	@UseInterceptors(AddHeaderInterceptor)
+	// @UseGuards(AuthAdminGuard)
 	// Depois de testado no Postmamp, podemos definir um DTO para os parâmetros de consulta
 	//findAllTasks(@Query() params: any) {
 	findAllTasks(@Query() paginationDto: PaginationDto) {
 		//console.log(params)
 		//console.log(paginationDto)
+		console.log(this.tasksUtils.splitString('Hello World from NestJS'))
 		return this.taskService.findAll(paginationDto)
 	}
 

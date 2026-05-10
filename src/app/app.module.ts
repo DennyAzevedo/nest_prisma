@@ -9,10 +9,19 @@ import { AppService } from './app.service';
 import { TasksModule } from '../tasks/tasks.module';
 import { UsersModule } from '../users/users.module';
 import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
+import { AuthAdminGuard } from 'src/common/guards/admin.guards';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [TasksModule, UsersModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // depois de testar, vamos colocar em um módulo específico.
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthAdminGuard
+    // }
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
