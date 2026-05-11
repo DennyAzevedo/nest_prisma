@@ -9,21 +9,22 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UpdateUserDto } from './dto/update.user.dto';
+import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
 
 @Injectable()
 export class UsersService {
-	constructor(private readonly databaseService: DatabaseService) {}
+	constructor(
+		private readonly databaseService: DatabaseService,
+		private readonly hashingService: HashingServiceProtocol
+	) { }
 
 	async findOne(id: number) {
-		//console.log(`Finding user with id: ${id}`);
-		//return `This action returns a user with id: ${id}`;
 		const user = await this.databaseService.user.findUnique({
 			where: { id },
-			select: { // depois de testar o createUser, adicionei o select para não retornar o hash da senha
+			select: {
 				id: true,
 				name: true,
 				email: true,
-				// depois de incluir o userId e testar as inclusões das tasks
 				tasks: true
 			}
 		});
@@ -34,16 +35,15 @@ export class UsersService {
 	}
 
 	async create(@Body() createUserDto: CreateUserDto) {
-		//console.log('Creating user with data:', createUserDto);
-		//return 'This action creates a user';
 		try {
+			const passwordHash = await this.hashingService.hash(createUserDto.password);
 			const newUser = await this.databaseService.user.create({
 				data: {
 					name: createUserDto.name,
 					email: createUserDto.email,
-					passwordHash: createUserDto.password
+					passwordHash: passwordHash
 				},
-				select: { // para evitar retornar o hash da senha
+				select: {
 					id: true,
 					name: true,
 					email: true,
@@ -58,6 +58,7 @@ export class UsersService {
 
 	async update(id: number, updateUserDto: UpdateUserDto) {
 		try {
+			let passwordHash = ""
 			const findUser = await this.databaseService.user.findUnique({
 				where: { id }
 			});
@@ -65,12 +66,14 @@ export class UsersService {
 			if (!findUser) {
 				throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 			}
-
+			if (updateUserDto.password) {
+				passwordHash = await this.hashingService.hash(updateUserDto.password);
+			}
 			const updatedUser = await this.databaseService.user.update({
 				where: { id },
 				data: {
 					name: updateUserDto.name ? updateUserDto.name : findUser.name,
-					passwordHash: updateUserDto.password ? updateUserDto.password : findUser.passwordHash
+					passwordHash: updateUserDto.password ? passwordHash : findUser.passwordHash
 				},
 				select: {
 					id: true,
