@@ -3,7 +3,7 @@ import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { DatabaseModule } from '../database/database.module';
 import { APP_FILTER } from '@nestjs/core';
-import { ApiExceptionFilter } from 'src/common/filters/exception.filter';
+import { ApiExceptionFilter } from '../common/filters/exception.filter';
 import { TasksUtils } from './tasks.utils';
 
 @Module({

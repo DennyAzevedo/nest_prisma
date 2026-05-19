@@ -8,27 +8,18 @@ import {
 	Put,
 	Delete,
 	ParseIntPipe,
-	UseInterceptors,
 	UseGuards
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './dto/update.task.dto';
 import { CreateTaskDto } from './dto/create.task.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
-import { BodyCreateTaskInterceptor } from 'src/common/interceptors/body-create-task.interceptor';
-import { AddHeaderInterceptor } from 'src/common/interceptors/add-header.interceptor';
-import { AuthAdminGuard } from 'src/common/guards/admin.guards';
 import { TasksUtils } from './tasks.utils';
+import { AuthTokenGuard } from '../auth/guard/auth-token.guard';
+import { PayloadTokenDto } from '../auth/dto/payload-token.dto';
+import { TokenPayloadParam } from '../auth/param/token-payload.param';
 
 @Controller('tasks')
-	// Testar o guard em todo conroller, depois mostar em um endponit
-	// E depois do teste, retornra o guard ao controller
-@UseGuards(AuthAdminGuard)
-	//@UseInterceptors(LoggerInterceptor)
-	// Podemos usar o interceptor para todas as rotas do controller, ou apenas para rotas específicas,
-	// como a rota de listagem de tarefas, por exemplo.
-	// Depois de testado, podemos decidir onde aplicar o interceptor.
 export class TasksController {
 	constructor(
 		private readonly taskService: TasksService,
@@ -36,14 +27,7 @@ export class TasksController {
 	) { }
 
 	@Get()
-	@UseInterceptors(LoggerInterceptor)
-	@UseInterceptors(AddHeaderInterceptor)
-	// @UseGuards(AuthAdminGuard)
-	// Depois de testado no Postmamp, podemos definir um DTO para os parâmetros de consulta
-	//findAllTasks(@Query() params: any) {
 	findAllTasks(@Query() paginationDto: PaginationDto) {
-		//console.log(params)
-		//console.log(paginationDto)
 		console.log(this.tasksUtils.splitString('Hello World from NestJS'))
 		return this.taskService.findAll(paginationDto)
 	}
@@ -53,19 +37,31 @@ export class TasksController {
 		return this.taskService.findOne(id)
 	}
 
+	@UseGuards(AuthTokenGuard)
 	@Post()
-	@UseInterceptors(BodyCreateTaskInterceptor)
-	createTask(@Body() createTaskDto: CreateTaskDto) {
-		return this.taskService.create(createTaskDto)
+	createTask(
+		@Body() createTaskDto: CreateTaskDto,
+		@TokenPayloadParam() tokenPayload: PayloadTokenDto
+	) {
+		return this.taskService.create(createTaskDto, tokenPayload)
 	}
 
+	@UseGuards(AuthTokenGuard)
 	@Put(":id")
-	updateTask(@Param("id", ParseIntPipe) id: number, @Body() updateTaskDto: UpdateTaskDto) {
-		return this.taskService.update(id, updateTaskDto)
+	updateTask(
+		@Param("id", ParseIntPipe) id: number,
+		@Body() updateTaskDto: UpdateTaskDto,
+		@TokenPayloadParam() tokenPayload: PayloadTokenDto
+	) {
+		return this.taskService.update(id, updateTaskDto, tokenPayload)
 	}
 
+	@UseGuards(AuthTokenGuard)
 	@Delete(":id")
-	deleteTask(@Param("id", ParseIntPipe) id: number) {
-		return this.taskService.delete(id)
+	deleteTask(
+		@Param("id", ParseIntPipe) id: number,
+		@TokenPayloadParam() tokenPayload: PayloadTokenDto
+	) {
+		return this.taskService.delete(id, tokenPayload)
 	}
 }

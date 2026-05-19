@@ -8,6 +8,7 @@ import { UpdateTaskDto } from './dto/update.task.dto';
 import { DatabaseService } from '../database/database.service';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { resolvePagination } from '../common/pagination/resolvePagination';
+import { PayloadTokenDto } from '../auth/dto/payload-token.dto';
 
 @Injectable()
 export class TasksService {
@@ -39,24 +40,25 @@ export class TasksService {
 		throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 	}
 
-	async create(createTaskDto: CreateTaskDto) {
+	async create(createTaskDto: CreateTaskDto, tokenPayload: PayloadTokenDto) {
 		try {
 			const newTask = await this.databaseService.task.create({
 				data: {
 					name: createTaskDto.name,
 					description: createTaskDto.description,
 					completed: false,
-					userId: createTaskDto.userId
+					userId: tokenPayload.sub
 				}
 			});
 
 			return newTask;
 		} catch (error) {
+			if (error instanceof HttpException) throw error;
 			throw new HttpException("Erro ao criar tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	async update(id: number, updateTaskDto: UpdateTaskDto) {
+	async update(id: number, updateTaskDto: UpdateTaskDto, tokenPayload: PayloadTokenDto) {
 		try {
 			const findTask = await this.databaseService.task.findUnique({
 				where: {
@@ -65,6 +67,9 @@ export class TasksService {
 			});
 			if (!findTask) {
 				throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
+			}
+			if(findTask.userId !== tokenPayload.sub) {
+				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 			}
 			const updatedTask = await this.databaseService.task.update({
 				where: {
@@ -75,11 +80,12 @@ export class TasksService {
 
 			return updatedTask;
 		} catch (error) {
+			if (error instanceof HttpException) throw error;
 			throw new HttpException("Erro ao atualizar tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	async delete(id: number) {
+	async delete(id: number, tokenPayload: PayloadTokenDto) {
 		try {
 			const findTask = await this.databaseService.task.findUnique({
 				where: {
@@ -89,6 +95,9 @@ export class TasksService {
 			if (!findTask) {
 				throw new HttpException("Tarefa não encontrada", HttpStatus.NOT_FOUND);
 			}
+			if(findTask.userId !== tokenPayload.sub) {
+				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			}
 			await this.databaseService.task.delete({
 				where: {
 					id
@@ -96,7 +105,8 @@ export class TasksService {
 			});
 
 			return { "message": "Tarefa removida com sucesso!" };
-		} catch(error) {
+		} catch (error) {
+			if (error instanceof HttpException) throw error;
 			throw new HttpException("Erro ao remover tarefa", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

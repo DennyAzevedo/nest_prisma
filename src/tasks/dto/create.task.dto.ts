@@ -11,7 +11,7 @@ export class CreateTaskDto {
 	@IsNotEmpty({ message: 'Description is required' })
 	readonly description: string;
 
-	@IsNumber()
-	@IsNotEmpty()
-	readonly userId: number;
+	// @IsNumber()
+	// @IsNotEmpty()
+	// readonly userId: number;
 }

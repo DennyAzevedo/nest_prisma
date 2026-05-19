@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { SignInDto } from './dto/signin.dto';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from '../database/database.service';
 import { HashingServiceProtocol } from './hash/hashing.service';
 import jwtConfig from './config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import e from 'express';
+import { StringValue } from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +38,17 @@ export class AuthService {
 			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 		}
 
+		if (!this.jwtConfiguration.secret) {
+			throw new HttpException('JWT secret is not configured', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		const tokenTtl = this.jwtConfiguration.ttl;
+		const expiresIn = tokenTtl
+			? /^\d+$/.test(tokenTtl)
+				? Number(tokenTtl)
+				: (tokenTtl as StringValue)
+			: undefined;
+
 		const token = await this.jwtService.signAsync(
 			{
 				sub: user.id,
@@ -45,7 +56,7 @@ export class AuthService {
 			},
 			{
 			secret: this.jwtConfiguration.secret,
-			expiresIn: this.jwtConfiguration.ttl,
+			expiresIn,
 			audience: this.jwtConfiguration.audience,
 			issuer: this.jwtConfiguration.issuer,
 			}
