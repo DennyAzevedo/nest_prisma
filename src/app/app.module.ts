@@ -13,6 +13,8 @@ import { AuthAdminGuard } from '../common/guards/admin.guards';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from '../auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'node:path';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,7 +23,11 @@ import { ConfigModule } from '@nestjs/config';
     }),
     TasksModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'files'),
+      serveRoot: '/files'
+    })
   ],
   controllers: [AppController],
   providers: [
