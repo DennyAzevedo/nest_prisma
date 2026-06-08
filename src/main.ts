@@ -12,12 +12,9 @@ import { ValidationPipe } from '@nestjs/common/pipes';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Se TRUE, remove propriedades que não estão definidas no DTO
-    // podemos testar no Postman enviando um campo extra, como "extra": "valor", e ele será removido automaticamente
-    transform: true, // Transforma os tipos de dados automaticamente com base nos DTOs (ex: string para number)
-    // Ajustar controller e service para mostrar o transform, como é global, deve ser usado com cuidado
-    // colocar com FALSE e mostrar a conversão manualmente
-  })) // Habilita validação global usando DTOs
+    whitelist: true,
+    transform: true,
+  }))
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

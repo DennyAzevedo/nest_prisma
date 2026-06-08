@@ -19,7 +19,7 @@ import { join } from 'node:path';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env'
     }),
     TasksModule,
     UsersModule,
